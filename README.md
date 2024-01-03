@@ -1,4 +1,4 @@
-# crear imagen de servidor blast
+# Crear imagen de servidor blast
 cd server
 docker rm blastservice
 docker build . -t test51 --platform linux/amd64
