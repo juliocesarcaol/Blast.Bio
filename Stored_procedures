@@ -1,0 +1,36 @@
+create extension plpython3u;
+
+CREATE or replace FUNCTION BLAST (query_sequence text)
+RETURNS TABLE (Hit_num int, Hit_id text, Hit_len int, Hit_hsps_Hsp_Hsp_midline text, typeresp text, midline text)
+AS $$
+import requests
+import json
+
+from requests.auth import HTTPBasicAuth
+headers = {'Content-Type': 'application/json'}
+body = {'query_id':'search','query_sequence':query_sequence, 'key2':'value2'}
+response = requests.post('http://blastservice:5000/blast/search', data=json.dumps(body), headers=headers)
+dataResponseBlast = json.loads(response.content)
+
+dataHits = dataResponseBlast['BlastOutput']['BlastOutput_iterations']['Iteration']['Iteration_hits']['Hit']
+resultComplete = []
+
+
+print(dataHits)
+for rowHit in dataHits:
+  print(rowHit)
+  resultRow = []
+  resultRow.append(rowHit['Hit_num'])
+  resultRow.append(rowHit['Hit_id'])
+  resultRow.append(rowHit['Hit_len'])
+  resultRow.append(rowHit['Hit_hsps'])
+  resultRow.append(str(type(rowHit['Hit_hsps']['Hsp'])))
+  if type(rowHit['Hit_hsps']['Hsp']).__name__ != 'list':
+    resultRow.append(rowHit['Hit_hsps']['Hsp']['Hsp_midline'])
+  else:
+    resultRow.append('Midline es lista')
+  
+  resultComplete.append(resultRow)
+
+
+return resultComplete
